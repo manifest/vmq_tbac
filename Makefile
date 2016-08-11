@@ -5,7 +5,7 @@ PROJECT_VERSION = 0.1.0
 DEPS = \
 	vmq_commons
 
-dep_vmq_commons = git git://github.com/erlio/vmq_commons.git 0.9.4
+dep_vmq_commons = git git://github.com/erlio/vmq_commons.git 1.0.0
 
 SHELL_DEPS = tddreloader
 SHELL_OPTS = \
