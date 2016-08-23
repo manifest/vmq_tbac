@@ -31,7 +31,9 @@
 
 %% API
 -export([
-	read_config/1
+	read_configs/0,
+	read_configs/1,
+	read_config/2
 ]).
 
 %% Hooks
@@ -52,7 +54,7 @@
 	auth_on_register_success_result/0,
 	auth_on_subscribe_success_result/0,
 	auth_on_publish_success_result/0,
-	config_file/0
+	config_files/0
 ]).
 
 %% Definitions
@@ -63,11 +65,25 @@
 %% API
 %% =============================================================================
 
--spec read_config(binary()) -> ok.
-read_config(Path) ->
+-spec read_configs() -> ok.
+read_configs() ->
+	Initial = config_files(),
+	read_configs(Initial),
+	case config_files() of
+		Initial -> ok;
+		Changed -> read_configs(Changed)
+	end.
+
+-spec read_configs([{atom(), binary()}]) -> ok.
+read_configs(L) ->
+	[read_config(App, Path) || {App, Path} <- L],
+	ok.
+
+-spec read_config(atom(), binary()) -> ok.
+read_config(App, Path) ->
 	_ =
 		case file:consult(Path) of
-			{ok, L} -> [application:set_env(?APP, Key, Val) || {Key, Val} <- L];
+			{ok, L} -> [application:set_env(App, Key, Val) || {Key, Val} <- L];
 			_       -> ignore
 		end,
 	ok.
@@ -115,8 +131,9 @@ auth_on_publish(UserName, _SubscriberId, _QoS, Topic, _Payload, _IsRetain) ->
 
 -spec start() -> ok.
 start() ->
+	read_configs(),
 	{ok, _} = application:ensure_all_started(?APP),
-	read_config(config_file()).
+	ok.
 
 -spec stop() -> ok.
 stop() ->
@@ -138,9 +155,11 @@ auth_on_subscribe_success_result() ->
 auth_on_publish_success_result() ->
 	application:get_env(?APP, ?FUNCTION_NAME, ok).
 
--spec config_file() -> binary().
-config_file() ->
-	list_to_binary(application:get_env(?APP, ?FUNCTION_NAME, "./etc/tbac.conf")).
+-spec config_files() -> [{atom(), binary()}].
+config_files() ->
+	Default = [{?APP, "./etc/tbac.conf"}],
+	[{App, list_to_binary(Val)}
+		|| {App, Val} <- application:get_env(?APP, ?FUNCTION_NAME, Default)].
 
 %% =============================================================================
 %% Internal functions
