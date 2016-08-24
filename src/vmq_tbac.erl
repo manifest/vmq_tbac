@@ -157,7 +157,7 @@ auth_on_publish_success_result() ->
 
 -spec config_files() -> [{atom(), binary()}].
 config_files() ->
-	Default = [{?APP, "./etc/tbac.conf"}],
+	Default = [{?APP, "/etc/vernemq/tbac.conf"}],
 	[{App, list_to_binary(Val)}
 		|| {App, Val} <- application:get_env(?APP, ?FUNCTION_NAME, Default)].
 
@@ -178,17 +178,3 @@ match_topic(Val, [H|T]) -> match_topic(Val, T, H).
 match_topic(Val, _, Val)     -> ok;
 match_topic(Val, [], Acc)    -> error({nomatch_topic, Val, Acc});
 match_topic(Val, [H|T], Acc) -> match_topic(Val, T, <<Acc/binary, $/, H/binary>>).
-
-%-spec match_topic(binary(), binary()) -> ok.
-%match_topic(Root, Topic) ->
-%	match_topic(byte_size(Root), Root, byte_size(Topic), Topic).
-%
-%-spec match_topic(non_neg_integer(), binary(), non_neg_integer(), binary()) -> ok.
-%match_topic(RootSz, Root, TopicSz, Topic) when RootSz =< TopicSz ->
-%	<<Val:RootSz/binary, _/bits>> = Topic,
-%	case Val =:= Root of
-%		true -> ok;
-%		_    -> error({nomatch_topic, Root, Topic})
-%	end;
-%match_topic(_RootSz, Root, _TopicSz, Topic) ->
-%	error({nomatch_topic, Root, Topic}).

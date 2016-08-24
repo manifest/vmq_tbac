@@ -6,13 +6,31 @@ The plugin for VerneMQ that provides client authorization based on MQTT topic.
 
 
 
-### How To Use
+### Overview
 
 The plugin is allowing publication and subscription only to topics that
 starts with client's username. For instance, a client with username `user/joe`
 could only publish or subscribe to `user/joe/#`.
 
 Client's username cannot contain `#` and `+` characters.
+
+
+
+### How To Use
+
+Build and run the docker container:
+
+```bash
+$ ./run-docker.sh
+```
+
+Execute following commands in container's shell:
+
+```bash
+$ make rel
+$ vmq-admin plugin enable --name vmq_joseauth --path $(pwd)/_rel/vmq_tbac
+$ mosquitto_pub -h localhost -t user/joe/hello -m hello -i user/joe -u user/joe
+```
 
 
 
